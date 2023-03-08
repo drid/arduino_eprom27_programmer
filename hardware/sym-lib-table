@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "eprom27_programmer")(type "KiCad")(uri "${KIPRJMOD}/eprom27_programmer.kicad_sym")(options "")(descr ""))
+)
