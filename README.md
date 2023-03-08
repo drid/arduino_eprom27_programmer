@@ -19,7 +19,7 @@ Based on the project: https://github.com/bouletmarc/BMBurner
 
 ![Schematic](https://github.com/walhi/arduino_eprom27_programmer/blob/master/imgs/sch.png)
 
-PCB divorced using autotracer. Not yet tested, but the prototype is working properly.
+PCB Built in KiCAD 7 using through hole components to preserve retro style
 
 *Resistors R1 and R2 are indicated in the Arduino firmware. By default, the values are 10 kOhm and 1.5 kOhm.*
 

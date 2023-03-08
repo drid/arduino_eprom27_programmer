@@ -45,11 +45,23 @@
         "silk_text_thickness": 0.09999999999999999,
         "silk_text_upright": false,
         "zones": {
-          "min_clearance": 0.5
+          "min_clearance": 1e-06
         }
       },
-      "diff_pair_dimensions": [],
-      "drc_exclusions": [],
+      "diff_pair_dimensions": [
+        {
+          "gap": 0.0,
+          "via_gap": 0.0,
+          "width": 0.0
+        }
+      ],
+      "drc_exclusions": [
+        "silk_edge_clearance|107550000|105900000|290f26de-4748-40c7-bc42-42f3f04b0f4d|5a54bba5-58ea-468b-88c7-d7435a97fc35",
+        "silk_edge_clearance|107550000|115100000|290f26de-4748-40c7-bc42-42f3f04b0f4d|94504d53-6844-4fe1-8235-88e3d050fc38",
+        "silk_edge_clearance|107550000|115100000|290f26de-4748-40c7-bc42-42f3f04b0f4d|9d62842f-8abb-4c20-b9d8-ff9498b3c673",
+        "silk_overlap|108245000|105900000|5a54bba5-58ea-468b-88c7-d7435a97fc35|4d842594-1477-4224-b4df-a987dd52c923",
+        "silk_overlap|108245000|115100000|4d842594-1477-4224-b4df-a987dd52c923|9d62842f-8abb-4c20-b9d8-ff9498b3c673"
+      ],
       "meta": {
         "filename": "board_design_settings.json",
         "version": 2
@@ -113,7 +125,7 @@
         "min_hole_to_hole": 0.25,
         "min_microvia_diameter": 0.19999999999999998,
         "min_microvia_drill": 0.09999999999999999,
-        "min_resolved_spokes": 2,
+        "min_resolved_spokes": 1,
         "min_silk_clearance": 0.0,
         "min_text_height": 0.7999999999999999,
         "min_text_thickness": 0.08,
@@ -164,8 +176,15 @@
           "td_width_to_size_filter_ratio": 0.9
         }
       ],
-      "track_widths": [],
-      "via_dimensions": [],
+      "track_widths": [
+        0.0
+      ],
+      "via_dimensions": [
+        {
+          "diameter": 0.0,
+          "drill": 0.0
+        }
+      ],
       "zones_allow_external_fillets": false
     },
     "layer_presets": [],
@@ -376,7 +395,7 @@
       "no_connect_dangling": "warning",
       "pin_not_connected": "error",
       "pin_not_driven": "error",
-      "pin_to_pin": "warning",
+      "pin_to_pin": "error",
       "power_pin_not_driven": "error",
       "similar_labels": "warning",
       "simulation_model_issue": "error",
@@ -398,7 +417,7 @@
     "classes": [
       {
         "bus_width": 12,
-        "clearance": 0.1524,
+        "clearance": 0.2,
         "diff_pair_gap": 0.25,
         "diff_pair_via_gap": 0.25,
         "diff_pair_width": 0.2,
@@ -408,9 +427,9 @@
         "name": "Default",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.2,
-        "via_diameter": 0.6,
-        "via_drill": 0.3,
+        "track_width": 0.5,
+        "via_diameter": 0.7,
+        "via_drill": 0.35,
         "wire_width": 6
       }
     ],
@@ -472,5 +491,9 @@
       ""
     ]
   ],
-  "text_variables": {}
+  "text_variables": {
+    "comment1": "Based on from https://github.com/walhi/arduino_eprom27_programmer",
+    "revision": "1",
+    "title": "EPROM 27Cxxx Programmer"
+  }
 }
