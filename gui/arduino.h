@@ -18,7 +18,7 @@ private:
     void send(const QByteArray &data);
 
 private slots:
-    void recieve();
+    void receive();
 
 public:
     enum chip {

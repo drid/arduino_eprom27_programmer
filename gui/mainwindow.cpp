@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
     updatePortsTimer.setInterval(1000);
     updatePortsTimer.start();
     reload_ports();
-
+    ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     this->setFixedSize(QSize(371, 431));
 }
 
@@ -76,6 +76,7 @@ void MainWindow::on_connectButton_clicked()
         QMessageBox::critical(this, tr("EPROM Programmer"), tr("Port is busy!"));
         return;
     }
+    ui->connectButton->setEnabled(false);
     log(QString("Connect to %1").arg(item->data(Qt::UserRole).toString()));
     openSerialPort(item->data(Qt::UserRole).toString());
 }
@@ -92,7 +93,7 @@ void MainWindow::openSerialPort(QString path)
                 log(QString("Connect successful"));
                 mArduino = new arduino(serialPort);
                 mArduino->selectChip(arduino::C256);
-                //mArduino->readChip();
+//                mArduino->readChip();
                 chipSelected = true;
                 //QObject::connect(serialPort, SIGNAL(errorOccurred()), this, SLOT(closeSerialPort()));
                 QObject::connect(mArduino, SIGNAL(chipUpdated(uint32_t)), this, SLOT(resizeBuffers()));
@@ -100,7 +101,7 @@ void MainWindow::openSerialPort(QString path)
                 chipSelectSetEnabled(true);
                 ui->updateButton->setEnabled(false);
                 ui->disconnectButton->setEnabled(true);
-                ui->connectButton->setEnabled(false);
+//                ui->connectButton->setEnabled(false);
                 ui->voltageChipButton->setEnabled(true);
 
                 updateButtons(true, false);
@@ -112,6 +113,7 @@ void MainWindow::openSerialPort(QString path)
     } else {
         QMessageBox::critical(this, tr("Error"), serialPort->errorString());
     }
+    ui->connectButton->setEnabled(true);
 }
 
 
@@ -174,7 +176,6 @@ void MainWindow::reload_ports()
     }
 }
 
-
 void MainWindow::updateButtons(bool actions, bool buffer)
 {
     if (actions){
@@ -198,10 +199,26 @@ void MainWindow::updateButtons(bool actions, bool buffer)
     ui->openFileButton->setEnabled(buffer);
 }
 
-
 void MainWindow::on_writeChipButton_clicked()
 {
+    updateButtons(false, false);
+    ui->progressBar->setMaximum(mArduino->getChipSize());
+    log(QString("Writing %1 bytes to chip...").arg(mArduino->getChipSize()));
+    progressBarConnection = QObject::connect(mArduino, SIGNAL(blockComplete(uint32_t)), this, SLOT(chipOperationProgressBar(uint32_t)));
+    writeCompleteConnection = QObject::connect(mArduino, SIGNAL(writeComplete()), this, SLOT(onWriteComplete()));
+    writeErrorConnection = QObject::connect(mArduino, SIGNAL(writeError(uint32_t,uint32_t)), this, SLOT(onWriteError(uint32_t,uint32_t)));
     mArduino->writeChip(bufWork);
+}
+
+void MainWindow::onWriteComplete(void){
+    QObject::disconnect(progressBarConnection);
+    QObject::disconnect(writeCompleteConnection);
+    QObject::disconnect(writeErrorConnection);
+    updateButtons(true, true);
+}
+
+void MainWindow::onWriteError(uint32_t addr, uint32_t val) {
+    log(QString("Write error on %1").arg(addr));
 }
 
 void MainWindow::on_readChipButton_clicked()
@@ -211,7 +228,17 @@ void MainWindow::on_readChipButton_clicked()
     log(QString("Reading %1 bytes from chip...").arg(mArduino->getChipSize()));
     mArduino->readChip();
     progressBarConnection = QObject::connect(mArduino, SIGNAL(blockComplete(uint32_t)), this, SLOT(chipOperationProgressBar(uint32_t)));
-    checkClearConnection = QObject::connect(mArduino, SIGNAL(readComplete(QByteArray)), this, SLOT(checkClear()));
+    checkClearConnection = QObject::connect(mArduino, SIGNAL(readComplete(QByteArray)), this, SLOT(onReadComplete(QByteArray)));
+}
+
+void MainWindow::onReadComplete(QByteArray data){
+    QObject::disconnect(progressBarConnection);
+    QObject::disconnect(checkClearConnection);
+    bufSize=data.count();
+    bufWork.setRawData(data, data.size());
+    checkClear();
+    showBuf();
+    updateButtons(true, true);
 }
 
 void MainWindow::checkClear()
@@ -221,20 +248,22 @@ void MainWindow::checkClear()
     QObject::disconnect(checkClearConnection);
     for (count = 0; count < bufSize; count++){
         if (bufWork[count] != (char)0xff){
+            bufferClear=false;
             log(QString("Chip not clear. Check before write."));
             break;
         }
     }
-    if (count >= bufSize)
+    if (count >= bufSize){
+        bufferClear=true;
         log(QString("Chip clear."));
+    }
 }
-
 
 void MainWindow::on_openFileButton_clicked()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
                                                     tr("Open binary to buffer"), "",
-                                                    tr("Binary (*.bin);;All Files (*)"));
+                                                    tr("Binary (*.bin *.rom *.ROM);;All Files (*)"));
 
     if (fileName.isEmpty())
         return;
@@ -253,8 +282,8 @@ void MainWindow::on_openFileButton_clicked()
         if ((uint32_t)bufWork.count() < bufSize) {
             bufWork.append((bufSize - bufWork.count()), 0xff);
         }
-        if ((uint32_t)bufWork.count() < bufSize) {
-            log(QString("Deleated %1 bytes").arg(bufWork.count() - bufSize));
+        if ((uint32_t)bufWork.count() > bufSize) {
+            log(QString("Deleted %1 bytes").arg(bufWork.count() - bufSize));
             bufWork.resize(bufSize);
         }
         bufferClear = false;
@@ -290,12 +319,13 @@ void MainWindow::on_saveFileButton_clicked()
     }
 }
 
-
-void MainWindow::verifyData()
+void MainWindow::verifyData(QByteArray data)
 {
     QObject::disconnect(verifyDataConnection);
+    QObject::disconnect(progressBarConnection);
     uint32_t errors_count = 0;
     uint32_t warnings_count = 0;
+    bufWork=data;
     for (uint32_t i = 0; i < bufSize; i++){
         // if ((old xor new) and new) err
         if ((bufWork[i] ^ bufCheck[i]) & bufCheck[i]){
@@ -319,13 +349,14 @@ void MainWindow::verifyData()
         log(QString("Verification successful."));
     }
     emit bufferUpdated();
+    updateButtons(true, true);
 }
-
 
 void MainWindow::on_showButton_toggled(bool checked)
 {
     if (checked){
         this->setFixedSize(QSize(791, 431));
+//        this->adjustSize();
         updateBufConnection = QObject::connect(this, SIGNAL(bufferUpdated()), this, SLOT(showBuf()));
         emit bufferUpdated();
     } else {
@@ -350,12 +381,15 @@ void MainWindow::showBuf()
             newItem = new QTableWidgetItem(QString::asprintf("%02X", (uint8_t)bufWork.data()[row * 8 + column]));
             if (bufCheck.data()[row * 8 + column] == NOT_WRITABLE) newItem->setForeground(QColor::fromRgb(255,0,0));
             if (bufCheck.data()[row * 8 + column] == WRITABLE) newItem->setForeground(QColor::fromRgb(255,127,0));
+            newItem->setTextAlignment(Qt::AlignCenter);
             tableWidget->setItem(row, column, newItem);
         }
     }
+    tableWidget->resizeColumnsToContents();
+    this->adjustSize();
 }
 
-void MainWindow::resizeBuffers(uint32_t size)
+void MainWindow::resizeBuffers()
 {
     chipSelected = true;
 
@@ -369,15 +403,17 @@ void MainWindow::resizeBuffers(uint32_t size)
     emit bufferUpdated();
 }
 
-
 void MainWindow::on_verifyChipButton_clicked()
 {
     // Backup work buffer
     bufCheck = bufWork;
+    log(QString("Reading %1 bytes from chip...").arg(mArduino->getChipSize()));
+    updateButtons(false, false);
+    ui->progressBar->setMaximum(mArduino->getChipSize());
+    progressBarConnection = QObject::connect(mArduino, SIGNAL(blockComplete(uint32_t)), this, SLOT(chipOperationProgressBar(uint32_t)));
+    verifyDataConnection = QObject::connect(mArduino, SIGNAL(readComplete(QByteArray)), this, SLOT(verifyData(QByteArray)));
     mArduino->readChip();
-    verifyDataConnection = QObject::connect(mArduino, SIGNAL(readComplete()), this, SLOT(verifyData()));
 }
-
 
 void MainWindow::on_c16Button_clicked()
 {
@@ -394,6 +430,7 @@ void MainWindow::on_c32Button_clicked()
 void MainWindow::on_c64Button_clicked()
 {
     log("Select 27C64 chip");
+    bufSize=8192;
     mArduino->selectChip(arduino::C64);
 }
 
@@ -415,13 +452,12 @@ void MainWindow::on_c512Button_clicked()
     mArduino->selectChip(arduino::C512);
 }
 
-
 void MainWindow::showVoltage()
-{    
-    //writeData("v");
+{
     QByteArray readData = serialPort->readAll();
     QByteArrayView str = "Programming voltage: ";
     int8_t pos;
+    mArduino->voltageMesurment(true);
     while (serialPort->waitForReadyRead(80)){
         readData.append(serialPort->readAll());
         if ((pos = readData.indexOf(str, 0)) != -1){

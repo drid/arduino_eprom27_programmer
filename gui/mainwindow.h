@@ -36,13 +36,17 @@ private slots:
 
     void on_readChipButton_clicked();
 
+    void onReadComplete(QByteArray data);
+
+    void onWriteComplete();
+
     void checkClear();
 
     void on_writeChipButton_clicked();
 
     void on_verifyChipButton_clicked();
 
-    void verifyData();
+    void verifyData(QByteArray data);
 
     void on_c16Button_clicked();
 
@@ -56,7 +60,7 @@ private slots:
 
     void on_c512Button_clicked();
 
-    void resizeBuffers(uint32_t size);
+    void resizeBuffers();
 
     void on_connectButton_clicked();
 
@@ -80,6 +84,8 @@ private slots:
 
     void chipOperationProgressBar(uint32_t value);
 
+    void onWriteError(uint32_t addr, uint32_t val);
+
 private:
     Ui::MainWindow *ui;
     QSerialPort *serialPort = NULL;
@@ -95,6 +101,8 @@ private:
     QMetaObject::Connection checkClearConnection;
     QMetaObject::Connection updateBufConnection;
     QMetaObject::Connection updateVoltageConnection;
+    QMetaObject::Connection writeCompleteConnection;
+    QMetaObject::Connection writeErrorConnection;
 
     bool chipSelected = false;
     bool bufferClear = true;
