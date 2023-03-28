@@ -11,9 +11,9 @@ Compatible Chips List (not all chips are tested):
  * 27C256
  * 27C512
 
-Before write, check programming voltage in datasheet! 
+Before write, check programming voltage in datasheet
 
-# Schematic
+## Schematic
 
 Based on the project: https://github.com/bouletmarc/BMBurner
 
@@ -21,11 +21,9 @@ Based on the project: https://github.com/bouletmarc/BMBurner
 
 PCB Built in KiCAD 7 using through hole components to preserve retro style
 
-*Resistors R1 and R2 are indicated in the Arduino firmware. By default, the values are 10 kOhm and 1.5 kOhm.*
+## Software
 
-# Software
-
-Software for PC written by Qt5.
+Software for PC written by Qt6.
 
 Functions:
 
@@ -36,6 +34,13 @@ Functions:
 
 ![GUI on Windows 10](https://github.com/walhi/arduino_eprom27_programmer/blob/master/imgs/win.png)
 
-Requared Windows 7 or later.
+Required Windows 7 or later.
 
 ![GUI on Ubuntu Mate](https://github.com/walhi/arduino_eprom27_programmer/blob/master/imgs/ubuntu_mate.png)
+
+## Changelog
+### Rev 1.0
+Migration of circuit from Eagle
+
+### Rev 1.1
+Add support for ID reading and EEPROM Erase

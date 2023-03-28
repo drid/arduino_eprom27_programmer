@@ -56,11 +56,9 @@
         }
       ],
       "drc_exclusions": [
-        "silk_edge_clearance|107550000|105900000|290f26de-4748-40c7-bc42-42f3f04b0f4d|5a54bba5-58ea-468b-88c7-d7435a97fc35",
-        "silk_edge_clearance|107550000|115100000|290f26de-4748-40c7-bc42-42f3f04b0f4d|94504d53-6844-4fe1-8235-88e3d050fc38",
-        "silk_edge_clearance|107550000|115100000|290f26de-4748-40c7-bc42-42f3f04b0f4d|9d62842f-8abb-4c20-b9d8-ff9498b3c673",
-        "silk_overlap|108245000|105900000|5a54bba5-58ea-468b-88c7-d7435a97fc35|4d842594-1477-4224-b4df-a987dd52c923",
-        "silk_overlap|108245000|115100000|4d842594-1477-4224-b4df-a987dd52c923|9d62842f-8abb-4c20-b9d8-ff9498b3c673"
+        "silk_overlap|190255000|106780000|9d62842f-8abb-4c20-b9d8-ff9498b3c673|4d842594-1477-4224-b4df-a987dd52c923",
+        "silk_overlap|190255000|115980000|5a54bba5-58ea-468b-88c7-d7435a97fc35|4d842594-1477-4224-b4df-a987dd52c923",
+        "silk_overlap|190300000|106780000|94504d53-6844-4fe1-8235-88e3d050fc38|4d842594-1477-4224-b4df-a987dd52c923"
       ],
       "meta": {
         "filename": "board_design_settings.json",
@@ -431,6 +429,23 @@
         "via_diameter": 0.7,
         "via_drill": 0.35,
         "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "Power",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 1.0,
+        "via_diameter": 0.7,
+        "via_drill": 0.35,
+        "wire_width": 6
       }
     ],
     "meta": {
@@ -438,7 +453,16 @@
     },
     "net_colors": null,
     "netclass_assignments": null,
-    "netclass_patterns": []
+    "netclass_patterns": [
+      {
+        "netclass": "Power",
+        "pattern": "VCC"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "+*V"
+      }
+    ]
   },
   "pcbnew": {
     "last_paths": {
@@ -493,7 +517,8 @@
   ],
   "text_variables": {
     "comment1": "Based on from https://github.com/walhi/arduino_eprom27_programmer",
-    "revision": "1",
-    "title": "EPROM 27Cxxx Programmer"
+    "description": "Programmer for 27Cxxx EPROMs and 27Exxx EEPROMs",
+    "revision": "1.1",
+    "title": "EPROM 27C/Exxx Programmer"
   }
 }
