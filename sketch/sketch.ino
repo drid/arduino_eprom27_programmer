@@ -47,7 +47,8 @@ typedef enum mode {
   WAIT,
   READ,
   WRITE,
-  VOLTAGE
+  VOLTAGE,
+  HEX_DUMP
 } Modes;
 
 
@@ -109,6 +110,7 @@ void setup() {
 void loop() {
   switch (mode) {
     case READ:
+    case HEX_DUMP:
       if (chip == NONE) {
         mode = WAIT;
         break;
@@ -120,7 +122,13 @@ void loop() {
       digitalWrite(outputEnable, LOW);
       for (uint16_t i = start_address; i <= end_address; i++) {
         uint8_t data = read_byte(i);
-        Serial.write(&data, sizeof(data));
+        if (mode == HEX_DUMP){
+          Serial.print(data, HEX);
+          Serial.print(" ");
+          if (i % 8 == 0) Serial.write("\n\r");
+        } else {
+          Serial.write(&data, sizeof(data));
+        }
         if (i == end_address) break; // Защита от переполнения uint16
       }
       digitalWrite(outputEnable, HIGH);
@@ -194,6 +202,7 @@ void loop() {
         case 'r': mode = READ; break;
         case 'w': mode = WRITE; break;
         case 'v': mode = VOLTAGE; break;
+        case 'h': mode = HEX_DUMP; break;
         case 'a': select_chip(C16); break;
         case 'b': select_chip(C32); break;
         case 'c': select_chip(C64); break;
